@@ -1,4 +1,6 @@
 const inquirer = require('inquirer');
+const fs = require('fs');
+const generatePage = require('./src/page-template.js');
 
 const promptUser = () => {
     return inquirer.prompt([
@@ -38,19 +40,9 @@ const promptUser = () => {
             type: 'input',
             name: 'about',
             message: 'Provide some information about yourself:',
-            when: ({ confirmAbout }) => {
-              if (confirmAbout) {
-                return true;
-              } else {
-                return false;
-              }
-            }
+            when: ({ confirmAbout }) => confirmAbout
         }
     ])
-    .then(promptProject)
-    .then(portfolioData => {
-        console.log(portfolioData);
-    });
 };
 
 const promptProject = portfolioData => {
@@ -110,12 +102,15 @@ Add a New Project
     });
   };
   
-  promptUser().then(answers => console.log(answers));
+  promptUser()
+    .then(promptProject)
+    .then(portfolioData => {
+        const pageHtml = generatePage(portfolioData);
 
-    // const fs = require('fs');
-    // const generatePage = require('./src/page-template.js');
-    // const pageHtml = generatePage(name, github);
-    // fs.writeFile('./index.html', pageHtml, err => {
-    //   if (err) throw new Error(err);
-    //   console.log('Portfolio complete! Check out index.html to see the output!');
-    // });
+        fs.writeFile('./index.html', pageHtml, err => {
+        if (err) throw new Error(err);
+        
+        console.log('Page created! Check out index.html in this directory to see it!');
+        });
+    });
+
